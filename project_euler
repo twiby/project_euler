@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import os
+import sys
+import argparse
+import importlib
+
+problems_path = "./problems"
+available_problems = set(int(f[:-3]) for f in os.listdir(problems_path) if os.path.isfile(os.path.join(problems_path, f)))
+
+def run_problem(n):
+	path = "problems." + str(n)
+	lib = importlib.import_module(path)
+	print("Problem", n, ":", lib.main())
+
+
+def main(args):
+	if args.problem is None:
+		for i in available_problems:
+			run_problem(i)
+		sys.exit()
+
+	elif not args.problem in available_problems:
+		print("This problem is not solved:", args.problem)
+		print("Solved problems:", available_problems)
+		sys.exit()
+
+	else:
+		run_problem(args.problem)
+		sys.exit()
+
+if __name__=="__main__":
+	parser = argparse.ArgumentParser(description="Solves some problems of the project euler")
+	parser.add_argument('-p','--problem', type=int, help="problem to show answer for")
+	args = parser.parse_args()
+	main(args)
