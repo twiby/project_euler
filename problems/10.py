@@ -1,43 +1,28 @@
 import numpy as np
 
-class PrimeException(Exception):
-	pass
+def sieve_prime(N):
+	marked = np.ones(N, dtype=bool)
+	marked[0] = False
+	marked[1] = False
+	target = np.sqrt(N)
 
-def partial_factorize(n):
-	for i in range(2, int(np.sqrt(n)) + 1):
-		res = n / i
-		if res == np.floor(res):
-			return i, n/i
-	raise PrimeException
+	current = 1
+	while current < target:
+		current += 1
+		while not marked[current]:
+			current += 1
 
-def is_prime(n):
-	for i in range(2, int(np.sqrt(n)) + 1):
-		if n % i == 0:
-			return False
-	return True
+		cursor = current * current
+		while cursor < N:
+			marked[cursor] = False
+			cursor += current
 
-def primes(max):
-	yield 2
-	yield 3
-	for i in range(1, max):
-		i1 = 6*i - 1
-		i2 = 6*i + 1
-
-		if i1 > max:
-			return
-		elif is_prime(i1):
-			yield i1
-
-
-		if i2 > max:
-			return
-		elif is_prime(i2):
-			yield i2
+	return np.where(marked)
 
 
 def main():
 	N = 2000000
-	return np.sum([p for p in primes(N)])
+	return np.sum(sieve_prime(N))
 
 if __name__ == "__main__":
 	print(main())
