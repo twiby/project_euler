@@ -6,7 +6,13 @@ import argparse
 import importlib
 
 problems_path = "./problems"
-available_problems = set(int(f[:-3]) for f in os.listdir(problems_path) if os.path.isfile(os.path.join(problems_path, f)))
+available_problems = set()
+for f in os.listdir(problems_path):
+	if os.path.isfile(os.path.join(problems_path, f)):
+		try: 
+			available_problems.add(int(f[:-3]))
+		except:
+			pass
 
 def run_problem(n):
 	path = "problems." + str(n)
@@ -21,6 +27,8 @@ def run_problem(n):
 
 
 def main(args):
+	os.chdir("./problems")
+
 	if args.problem is None:
 		for i in available_problems:
 			run_problem(i)

@@ -7,7 +7,7 @@ test = [
 
 def main():
 	tree = []
-	with open("./p067_triangle.txt", "r") as f:
+	with open("./data/p067_triangle.txt", "r") as f:
 		for l in f:
 			tree.append([int(c) for c in l[:-1].split(" ")])
 
