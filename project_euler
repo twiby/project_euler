@@ -25,9 +25,15 @@ def run_problem(n):
 
 	print("Problem", n, ":", result, "(in", duration, "sec)")
 
+def print_solved():
+	print("Solved problems:", available_problems)
 
 def main(args):
 	os.chdir("./problems")
+
+	if args.list:
+		print_solved()
+		sys.exit()
 
 	if args.problem is None:
 		for i in available_problems:
@@ -36,7 +42,7 @@ def main(args):
 
 	elif not args.problem in available_problems:
 		print("This problem is not solved:", args.problem)
-		print("Solved problems:", available_problems)
+		print_solved()
 		sys.exit()
 
 	else:
@@ -46,5 +52,6 @@ def main(args):
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(description="Solves some problems of the project euler")
 	parser.add_argument('-p','--problem', type=int, help="problem to show answer for")
+	parser.add_argument('-l','--list', action='store_true', help="lists all solved problems")
 	args = parser.parse_args()
 	main(args)
