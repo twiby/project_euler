@@ -16,7 +16,7 @@ def main():
 	s = set()
 	for a in range(2, 10000):
 		na = nb_digits(a)
-		b = 2
+		b = a+(10**na)
 		while na + nb_digits(b) + nb_digits(a*b) < 10:
 			if pandigital(a,b):
 				s.add(a*b)
