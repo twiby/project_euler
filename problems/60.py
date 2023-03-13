@@ -23,67 +23,49 @@ def sieve_prime(N):
 def is_prime(n, sieve, primes):
 	if n < len(sieve):
 		return sieve[n]
-	assert(False)
+
 	for i in primes:
 		if i*i > n:
 			return True
 		elif not n % i:
 			return False
-	assert(False)
-	m = i % 6
+	return False
 
-	if m == 1:
-		while i * i <= n:
-			if n % i:
-				i += 4
-			else:
-				return False
-			if n % i:
-				i += 2
-			else:
-				return False
-	else:
-		while i * i <= n:
-			if n % i:
-				i += 2
-			else:
-				return False
-			if n % i:
-				i += 4
-			else:
-				return False
+order = [1, 10, 100, 1000, 10000]
+def is_prime_pair(p1,p2,d1,d2, sieve, primes):
+	return (is_prime(p1+p2*order[d1], sieve, primes)) and \
+		(is_prime(p2+p1*order[d2], sieve, primes))
 
+def sub_primes_pairs(primes_1, primes_str_1, primes, sieve, nb_digits, ret):
+	length = len(primes_1[np.where(primes_1 < 10**nb_digits)])
+	for i1 in range(1,length):
+		p1 = primes_1[i1]
+		d1 = len(primes_str_1[i1])
+		for p2,d2 in zip(primes_1[1:i1], primes_str_1[1:i1]):
 
-	return True
+			if is_prime_pair(p1,p2,d1,len(d2),sieve, primes):
+				ret.append((p2,p1))
 
-def is_prime_pair(p1,p2, sieve, primes):
-	try:
-		return \
-			is_prime(int(p1+p2), sieve, primes) and \
-			is_prime(int(p2+p1), sieve, primes)
-	except IndexError:
-		return False
+def prime_pairs(nb_digits, primes, sieve):
+	primes_1 = primes[np.where(primes%3 == 1)]
+	primes_2 = primes[np.where(primes%3 == 2)]
+	primes_str_1 = np.array([str(p) for p in primes_1])
+	primes_str_2 = np.array([str(p) for p in primes_2])
 
-def prime_pairs(primes_str, primes, sieve):
-	nb_dig = len(str(len(sieve)))
-	max_nb_dig = nb_dig//2 if nb_dig%2 else nb_dig//2-1
-	length = len(primes[np.where(primes < 10**(max_nb_dig))])
-	for i1 in range(length):
-		p1 = primes_str[i1]
-		for i2 in range(i1):
-			p2 = primes_str[i2]
-			if is_prime_pair(p1,p2, sieve, primes):
-				yield p2, p1
+	ret = []
+	sub_primes_pairs(primes_1.copy(), primes_str_1.copy(), primes.copy(), sieve.copy(), nb_digits, ret)
+	sub_primes_pairs(primes_2.copy(), primes_str_2.copy(), primes.copy(), sieve.copy(), nb_digits, ret)
 
+	return ret
 
 
 
 def main():
-	N = 100000000
+	N = 10000
 	sieve, primes = sieve_prime(N)
-	primes_str = [str(p) for p in primes]
 
-	prime_tuples_list = [p for p in prime_pairs(primes_str, primes, sieve)]
+	prime_tuples_list = prime_pairs(4, primes, sieve)
+	pairs = set(prime_tuples_list)
 	filler_candidates = set(np.array(prime_tuples_list).flatten())
 
 	for t in prime_tuples_list:
@@ -93,60 +75,43 @@ def main():
 	prime_tuples_list_3 = []
 	for t in prime_tuples_list:
 		for p in filler_candidates:
-			if int(p) >= int(t[0]):
+			if p >= t[0]:
 				continue
 			good = True
 			for tt in t:
-				if not is_prime_pair(p, tt, sieve, primes):
+				if not (p,tt) in pairs:
 					good = False
 					break
 			if good:
 				prime_tuples_list_3.append((p,) + t)	
 	filler_candidates = set(np.array(prime_tuples_list_3).flatten())
-	# print(prime_tuples_list_3, len(filler_candidates))
-
-	for t in prime_tuples_list_3:
-		for i in range(len(t)-1):
-			assert(int(t[i+1])>int(t[i])) 
-
 
 	prime_tuples_list_4 = []
 	for t in prime_tuples_list_3:
 		for p in filler_candidates:
-			if int(p) >= int(t[0]):
+			if p >= t[0]:
 				continue
 			good = True
 			for tt in t:
-				if not is_prime_pair(p, tt, sieve, primes):
+				if not (p,tt) in pairs:
 					good = False
 					break
 			if good:
 				prime_tuples_list_4.append((p,)+t)
 	filler_candidates = set(np.array(prime_tuples_list_4).flatten())
-	# print(prime_tuples_list_4, len(filler_candidates))
-
-	for t in prime_tuples_list_4:
-		for i in range(len(t)-1):
-			assert(int(t[i+1])>int(t[i])) 
 
 	prime_tuples_list_5 = []
 	for t in prime_tuples_list_4:
 		for p in filler_candidates:
-			if int(p) >= int(t[0]):
+			if p >= t[0]:
 				continue
 			good = True
 			for tt in t:
-				if not is_prime_pair(p, tt, sieve, primes):
+				if not (p,tt) in pairs:
 					good = False
 					break
 			if good:
 				prime_tuples_list_5.append((p,)+t)
-	filler_candidates = set(np.array(prime_tuples_list_5).flatten())
-	# print(prime_tuples_list_5, len(filler_candidates))
-
-	for t in prime_tuples_list_5:
-		for i in range(len(t)-1):
-			assert(int(t[i+1])>int(t[i])) 
 
 	if len(prime_tuples_list_5) > 0:
 		max_sum = 0
