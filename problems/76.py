@@ -1,10 +1,7 @@
 import numpy as np
 
 def main():
-	N = 5
 	N = 100
-	values = [i for i in range(1, N)]
-	values.reverse()
 
 	table = np.zeros((N+1,N+1), dtype=np.int64)
 	table[0,:] = 1
