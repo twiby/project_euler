@@ -46,23 +46,31 @@ square_names = {
 def six_dice_probas():
 	return np.array([0, 0, 1/36, 2/36, 3/36, 4/36, 5/36, 6/36,
 			5/36, 4/36, 3/36, 2/36, 1/36])
-def six_dice_three_doubles():
-	return 1/(6*6*6)
+def six_dice_double():
+	return 1/6
 
 def four_dice_probas():
 	return np.array([0, 0, 1/16, 2/16, 3/16, 4/16, 3/16, 2/16, 1/16])
-def four_dice_three_doubles():
-	return 1/(4*4*4)
+def four_dice_double():
+	return 1/4
 
-def move_by_roll(n):
+def move_by_roll(n, roll):
 	ret = np.zeros(40)
-	roll = four_dice_probas()
 	for idx in range(len(roll)):
 		ret[(n + idx) % 40] = roll[idx]
 
 	### Go to jail
 	ret[square_names["JAIL"]] += ret[square_names["G2J"]]
 	ret[square_names["G2J"]] = 0
+
+	### Community chest
+	for cc in ["CC1", "CC2", "CC3"]:
+		if not ret[square_names[cc]]:
+			continue
+		value = ret[square_names[cc]]
+		ret[square_names[cc]] -= 2*value/16
+		ret[square_names["JAIL"]] += value/16
+		ret[square_names["GO"]] += value/16
 
 	### Chance
 	next_r = {
@@ -90,30 +98,34 @@ def move_by_roll(n):
 		ret[square_names[next_u[ch]]] += value/16
 		ret[square_names[ch]-3] += value/16
 
-	### Community chest
-	for cc in ["CC1", "CC2", "CC3"]:
-		if not ret[square_names[cc]]:
-			continue
-		value = ret[square_names[cc]]
-		ret[square_names[cc]] -= 2*value/16
-		ret[square_names["JAIL"]] += value/16
-		ret[square_names["GO"]] += value/16
+	return ret
 
-	return ret / np.sum(ret)
+def get_state_transition(roll, double_proba):
+	state_transition = np.zeros((120, 120))
+	for i in range(40):
+		move_proba = move_by_roll(i, roll)
+
+		state_transition[i, :40] += (1 - double_proba) * move_proba
+		state_transition[40+i, :40] += (1 - double_proba) * move_proba
+		state_transition[80+i, :40] += (1 - double_proba) * move_proba
+
+		state_transition[i, 40:80] += double_proba * move_proba
+		state_transition[40+i, 80:] += double_proba * move_proba
+		state_transition[80+i, square_names["JAIL"]] += double_proba
+
+	return state_transition
 
 def main():
-	probas = np.array([0.0 for _ in range(40)])
-	probas[0] = 1
+	state_transition = get_state_transition(four_dice_probas(), four_dice_double())
 
-	for _ in range(500):
-		new_probas = np.sum([probas[i] * move_by_roll(i) for i in range(40)], axis = 0)
-		probas = new_probas
-
-	### three doubles gets you to jail (this approach is probably wrong, 
-	### but we only need an approxmation)
-	go2jail_bydice_proba = four_dice_three_doubles()
-	probas *= 1 - go2jail_bydice_proba
-	probas[square_names["JAIL"]] += go2jail_bydice_proba
+	probas = np.ones(120)
+	new_probas = probas @ state_transition
+	new_probas /= np.sum(new_probas)
+	while np.max(np.abs(new_probas - probas)) > 0.0000001:
+		probas = new_probas.copy()
+		new_probas = probas @ state_transition
+		new_probas /= new_probas.sum()
+	probas = probas[:40] + probas[40:80] + probas[80:]
 
 	most_probable_squares = np.argsort(1-probas)
 	return most_probable_squares[0]*10000 + most_probable_squares[1]*100 + most_probable_squares[2]
