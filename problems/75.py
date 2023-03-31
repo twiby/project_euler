@@ -12,7 +12,7 @@ def enumerate_pythagorean_triple(N):
 	p, q = c*((order+b)//d) - a, d*((order+b)//d) - b
 	while (p,q) != (1,1):
 		if (p+q)%2:
-			yield (q*q-p*p, 2*p*q, c*c+d*d)
+			yield (q*q-p*p, 2*p*q, p*p+q*q)
 		p, q = c*((order+b)//d) - a, d*((order+b)//d) - b
 		a,b,c,d = c,d,p,q
 
