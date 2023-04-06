@@ -1,6 +1,7 @@
 import numpy as np
 from multiprocessing import Pool
 from multiprocessing import cpu_count
+from multiprocessing import set_start_method
 
 def solve(grid, first = True):
 	if (grid[:,:] > 0).all():
@@ -52,6 +53,7 @@ def main():
 				new_grid[l,:] = [int(c) for c in line]
 			grids.append(new_grid.copy())
 
+	set_start_method('fork')
 	pool = Pool(cpu_count())
 	results = pool.map(solve, grids)
 
