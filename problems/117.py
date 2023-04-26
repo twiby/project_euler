@@ -9,9 +9,7 @@ def main():
 		n += nb_ways[i-4]
 		nb_ways.append(n)
 
-	print(nb_ways[N])
-
-	return 0
+	return nb_ways[N]
 
 if __name__=="__main__":
 	print(main())
