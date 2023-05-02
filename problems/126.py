@@ -1,5 +1,4 @@
 import numpy as np
-from itertools import combinations
 
 def T(n):
 	return n*(n+1)//2
@@ -37,17 +36,14 @@ def main():
 
 	C = np.zeros(N, dtype=np.uint64)
 
+	triangulars = np.array([T(i-1) for i in range(68)])*8
+	linear_term = np.array([i for i in range(68)])*4
+
 	for a in range(1, (N-4)//2+1):
 		for b in range(a, (N-2*a)//(2*a+2)+1):
 			for c in range(b, (N-2*a*b)//(2*a+2*b)+1):
-				cov = 2*(a*c+a*b+b*c)
-				diff = 4*(a+b+c)
-				i = 0
-				while cov < N:
-					C[cov] += 1
-					cov += diff
-					diff += 8
-					i += 1
+				layers = 2*(a*c+a*b+b*c) + (a+b+c)*linear_term + triangulars
+				C[layers[layers < N]] += 1
 
 	return np.where(C == 1000)[0][0]
 
