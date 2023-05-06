@@ -52,10 +52,6 @@ def main():
 		prime_sieve[primes[p]::primes[p], p] = False
 	numbers_without_a_given_prime = {primes[p]: prime_sieve[:, p] for p in range(len(primes))}
 
-	reversed_numbers = [i for i in range(N//2)]
-	reversed_numbers.reverse()
-	reversed_numbers = 1 + np.array(reversed_numbers)
-
 	all_rad = np.array([rad(i, sieve, primes) for i in range(N)])
 
 	s = 0
@@ -69,17 +65,15 @@ def main():
 		if len(unique_factors) == len(factors):
 			continue
 
-		a = reversed_numbers[N//2 - c//2 + 1:]
-		b = c-a
-
-		rad_abc = all_rad[c] * all_rad[a] * all_rad[b]
+		rad_abc = all_rad[c] * all_rad[1:c//2] * all_rad[c-1:c-c//2:-1]
 		sel = rad_abc < c
-		a = a[sel]
 
-		sel = np.ones(len(a), dtype=bool)
-		for f in unique_factors:
-			sel &= numbers_without_a_given_prime[f][a]
+		candidates = 1 + np.where(sel)[0]
 
+		if len(candidates) == 0:
+			continue
+
+		sel = np.all([numbers_without_a_given_prime[f][candidates] for f in unique_factors], axis=0)
 		s += c*sum(sel)
 
 	return s
