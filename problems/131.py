@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 
 def sieve_prime(N):
@@ -13,47 +14,34 @@ def sieve_prime(N):
 
 	return marked, np.where(marked)[0]
 
+def is_square(n):
+	candidate = int(round(np.sqrt(n)))
+	if candidate*candidate == n:
+		return True
+	return False
+
 def main():
-	### N^3 + N^2*p = k^3
-
-	### N^2*(N+p) = k^3
-
-	### p = (k^3 - n^3)/n^2
-
-	### a^2 - b^2 = (a+b)(a-b)
-
-	### ()
-
-	N = 10000
+	N = 1000000
 	sieve, primes = sieve_prime(N)
 
-	cubes = [n*n*n for n in range(N)]
-
-	last_good_n = 1
-	last_good_k = 2
-
+	squares = set([n*n for n in range(N)])
+	max_square = max(squares)
 
 	nb = 0
-	for p in primes:
-		# print(p)
-		k = last_good_k
-		n = last_good_n
-
-		while k < N and n < N:
-			candidate = (cubes[k] - cubes[n])/n/n
-			if candidate < p:
-				k += 1
-			elif candidate > p:
-				n += 1
-			elif (cubes[k] - cubes[n]) % (n*n) == 0:
-				print("GOOD",p, n, k, k-n, np.sqrt(k-n))
-				last_good_n = n
-				last_good_k = k
-				nb += 1
-				break
-			else:
-				k += 1
-
+	last_good_sqrt_k_prime = 1
+	for p in primes[2:]:
+		sqrt_k_prime = int(np.sqrt(p/3))
+		k_prime = sqrt_k_prime * sqrt_k_prime
+		d = 9*(k_prime**2) - 4*k_prime*(3*k_prime-p)
+		if d > max_square:
+			print("not enough squares")
+			sys.exit(1)
+		if not d in squares:
+			continue
+		n = (-k_prime*round(np.sqrt(d)) - 3*(k_prime**2))
+		if n % (2*(3*k_prime - p)):
+			continue
+		nb += 1
 
 	return nb
 
